@@ -1,327 +1,222 @@
-# Project Template: React/Rails API
+# Putting it All Together: Auth
 
-## Description
+## Learning Goals
 
-This project is scaffolded so that you can build a React frontend and Rails
-backend together, and easily deploy them to Heroku.
+- Authenticate a user with a username and password
+- Authorize logged in users for specific actions
 
-## Requirements
+## Introduction
 
-- Ruby 2.7.4
-- NodeJS (v16), and npm
-- Heroku CLI
-- Postgresql
-
-See Environment Setup below for instructions on installing these tools if you
-don't already have them.
+This is the biggest lab yet for this phase, so make sure to set aside some time
+for this one. It's set up with a few different checkpoints so that you can build
+out the features incrementally. By the end of this lab, you'll have built out
+full authentication and authorization flow using sessions and cookies in Rails,
+so getting this lab under your belt will give you some good code to reference
+when you're building your next project with auth. Let's get started!
 
 ## Setup
 
-Start by **cloning** (not forking) the project template repository and removing
-the remote:
+As with other labs in this section, there is some starter code in place for a
+Rails API backend and a React frontend. To get set up, run:
 
 ```console
-$ git clone git@github.com:learn-co-curriculum/project-template-react-rails-api.git your-project-name
-$ cd your-project-name
-$ git remote rm origin
+$ bundle install
+$ npm install --prefix client
 ```
 
-Then, [create a new remote repository][create repo] on GitHub. Head to
-[github.com](https://github.com) and click the **+** icon in the top-right
-corner and follow the steps to create a new repository. **Important**: don't
-check any of the options such as 'Add a README file', 'Add a .gitignore file',
-etc — since you're importing an existing repository, creating any of those files
-on GitHub will cause issues.
-
-[create repo]: https://docs.github.com/en/github/importing-your-projects-to-github/importing-source-code-to-github/adding-an-existing-project-to-github-using-the-command-line#adding-a-project-to-github-without-github-cli
-
-If you're working with a partner,
-[add them as a collaborator][add collaborator] on GitHub. From your repo on
-GitHub, go to Settings > Manage Access > Invite a collaborator and enter your
-partner's username. Once your partner has access, they should git **clone** (not
-fork) the repository.
-
-[add collaborator]: https://docs.github.com/en/account-and-profile/setting-up-and-managing-your-github-user-account/managing-access-to-your-personal-repositories/inviting-collaborators-to-a-personal-repository
-
-Finally, connect the GitHub remote repository to your local repository and push
-up your code:
+You can work on this lab by running the tests with `learn test`. It will also be
+helpful to see what's happening during the request/response cycle by running the
+app in the browser. You can run the Rails server with:
 
 ```console
-$ git remote add origin git@github.com:your-username/your-project-name.git
-$ git push -u origin main
+$ rails s
 ```
 
-When you're ready to start building your project, run:
+And you can run React in another terminal with:
 
-```sh
-bundle install
-rails db:create
-npm install --prefix client
+```console
+$ npm start --prefix client
 ```
 
-You can use the following commands to run the application:
+## Instructions
 
-- `rails s`: run the backend on [http://localhost:3000](http://localhost:3000)
-- `npm start --prefix client`: run the frontend on
-  [http://localhost:4000](http://localhost:4000)
+For all the deliverables below, if you use any Rails generators to create models
+or controllers, make sure to use the `--no-test-framework` flag to avoid
+overwriting the existing tests.
 
-Make sure to also update this README to include documentation about
-your project. Here's a list of some [awesome readmes][] for inspiration.
+### Models
 
-[awesome readmes]: https://github.com/matiassingers/awesome-readme
+Create a `User` model with the following attributes:
 
-## Deploying
+- `username` that is a `string` type
+- `password_digest` that is a `string` type
+- `image_url` that is a `string` type
+- `bio` that is a `string` type
 
-This application has all the starter code needed to help you deploy your
-application to Heroku. It's recommended to deploy your project early and push up
-changes often to ensure that your code works equally well in production and
-development environments.
+Your `User` model should also:
 
-If you've already set up your environment to deploy to Heroku, you can run the
-commands below to deploy your application. If not, make sure to check out the
-Environment Setup section below.
+- incorporate the `has_secure_password` macro to enable password encryption with
+  `bcrypt`
+- validate the user's username to ensure that it is **present** and **unique**
+  (no two users can have the same username)
+- a user **has many** recipes
 
-To deploy, first log in to your Heroku account using the Heroku CLI:
+Next, create a `Recipe` model with the following attributes:
 
-```sh
-heroku login
+- a recipe **belongs to** a user
+- `title` that is a `string` type
+- `instructions` that is a `text` type
+- `minutes_to_complete` that is an `integer` type
+
+Add validations for the `Recipe` model:
+
+- `title` must be present
+- `instructions` must be present and at least 50 characters long
+
+Run the migrations after creating your models.
+
+Ensure that the tests for the models are passing before moving forward. To run
+the tests for _only_ the model files, run:
+
+```console
+$ rspec spec/models
 ```
 
-Create the new Heroku app:
+### Sign Up Feature
 
-```sh
-heroku create my-app-name
+After creating the models, the next step is building out a sign up feature.
+
+Handle sign up by implementing a `POST /signup` route. It should:
+
+- Be handled in the `UsersController` with a `create` action
+- In the `create` action, if the user is valid:
+  - Save a new user to the database with their username, encrypted password,
+    image URL, and bio
+  - Save the user's ID in the session hash
+  - Return a JSON response with the user's ID, username, image URL, and bio; and
+    an HTTP status code of 201 (Created)
+- If the user is not valid:
+  - Return a JSON response with the error message, and an HTTP status code of
+    422 (Unprocessable Entity)
+
+> Note: Recall that we need to format our error messages in a way that makes it
+> easy to display the information in our frontend. For this lab, because we are
+> setting up multiple validations on our `User` and `Recipe` models, our error
+> responses need to be formatted in a way that accommodates multiple errors.
+
+### Auto-Login Feature
+
+Users can log into our app! 🎉 But we want them to **stay** logged in when they
+refresh the page, or navigate back to our site from somewhere else.
+
+Handle auto-login by implementing a `GET /me` route. It should:
+
+- Be handled in the `UsersController` with a `show` action
+- In the `show` action, if the user is logged in (if their `user_id` is in the
+  session hash):
+  - Return a JSON response with the user's ID, username, image URL, and bio; and
+    an HTTP status code of 201 (Created)
+- If the user is **not** logged in when they make the request:
+  - Return a JSON response with an error message, and a status of 401
+    (Unauthorized)
+
+Make sure the signup and auto-login features work as intended before moving
+forward. You can test the `UsersController` requests with RSpec:
+
+```console
+$ rspec spec/requests/users_spec.rb
 ```
 
-Add the buildpacks for Heroku to build the React app on Node and run the Rails
-app on Ruby:
+You should also be able to test this in the React application by signing up via
+the sign up form to check the `POST /signup` route; and refreshing the page
+after logging in, and seeing that you are still logged in to test the `GET /me`
+route.
 
-```sh
-heroku buildpacks:add heroku/nodejs --index 1
-heroku buildpacks:add heroku/ruby --index 2
+### Login Feature
+
+Now that users can create accounts via the API, let's give them a way to log
+back into an existing account.
+
+Handle login by implementing a `POST /login` route. It should:
+
+- Be handled in the `SessionsController` with a `create` action
+- In the `create` action, if the user's username and password are authenticated:
+  - Save the user's ID in the session hash
+  - Return a JSON response with the user's ID, username, image URL, and bio
+- If the user's username and password are not authenticated:
+  - Return a JSON response with an error message, and a status of 401
+    (Unauthorized)
+
+Make sure this route works as intended by running `learn test` before moving
+forward. You should also be able to test this in the React application by
+logging in via the login form.
+
+### Logout Feature
+
+Users can log into our app! 🎉 Now, let's give them a way to log out.
+
+Handle logout by implementing a `DELETE /logout` route. It should:
+
+- Be handled in the `SessionsController` with a `destroy` action
+- In the `destroy` action, if the user is logged in (if their `user_id` is in
+  the session hash):
+  - Remove the user's ID from the session hash
+  - Return an empty response with an HTTP status code of 204 (No Content)
+- If the user is **not** logged in when they make the request:
+  - Return a JSON response with an error message, and a status of 401
+    (Unauthorized)
+
+Make sure the login and logout features work as intended before moving forward.
+You can test the `SessionsController` requests with RSpec:
+
+```console
+$ rspec spec/requests/sessions_spec.rb
 ```
 
-To deploy, commit your code and push the changes to Heroku:
-
-```sh
-git add .
-git commit -m 'Commit message'
-git push heroku main
-```
-
-> Note: depending on your Git configuration, your default branch might be named
-> `master` or `main`. You can verify which by running
-> `git branch --show-current`. If it's `master`, you'll need to run
-> `git push heroku master` instead.
-
-Any time you have changes to deploy, just make sure your changes are committed
-on the main branch of your repo, and push those changes to Heroku to deploy
-them.
-
-You can view your deployed app with:
-
-```sh
-heroku open
-```
-
-## Environment Setup
-
-### Install the Latest Ruby Version
-
-Verify which version of Ruby you're running by entering this in the terminal:
-
-```sh
-ruby -v
-```
-
-Make sure that the Ruby version you're running is listed in the [supported
-runtimes][] by Heroku. At the time of writing, supported versions are 2.6.8,
-2.7.4, or 3.0.2. Our recommendation is 2.7.4, but make sure to check the site
-for the latest supported versions.
-
-If it's not, you can use `rvm` to install a newer version of Ruby:
-
-```sh
-rvm install 2.7.4 --default
-```
-
-You should also install the latest versions of `bundler` and `rails`:
-
-```sh
-gem install bundler
-gem install rails
-```
-
-[supported runtimes]: https://devcenter.heroku.com/articles/ruby-support#supported-runtimes
-
-### Install NodeJS
-
-Verify you are running a recent version of Node with:
-
-```sh
-node -v
-```
-
-If your Node version is not 16.x.x, install it and set it as the current and
-default version with:
-
-```sh
-nvm install 16
-nvm use 16
-nvm alias default 16
-```
-
-You can also update your npm version with:
-
-```sh
-npm i -g npm
-```
-
-### Sign Up for a [Heroku Account][heroku signup]
-
-You can sign up at for a free account at
-[https://signup.heroku.com/devcenter][heroku signup].
-
-### Download the [Heroku CLI][heroku cli] Application
-
-Download the Heroku CLI. For OSX users, you can use Homebrew:
-
-```sh
-brew tap heroku/brew && brew install heroku
-```
-
-For WSL users, run this command in the Ubuntu terminal:
-
-```sh
-curl https://cli-assets.heroku.com/install.sh | sh
-```
-
-If you run into issues installing, check out the [Heroku CLI][heroku cli]
-downloads page for more options.
-
-After downloading, you can login via the CLI in the terminal:
-
-```sh
-heroku login
-```
-
-This will open a browser window to log you into your Heroku account. After
-logging in, close the browser window and return to the terminal. You can run
-`heroku whoami` in the terminal to verify that you have logged in successfully.
-
-[heroku signup]: https://signup.heroku.com/devcenter
-[heroku cli]: https://devcenter.heroku.com/articles/heroku-cli#download-and-install
-
-### Install Postgresql
-
-Heroku requires that you use PostgreSQL for your database instead of SQLite.
-PostgreSQL (or just Postgres for short) is an advanced database management
-system with more features than SQLite. If you don't already have it installed,
-you'll need to set it up.
-
-#### PostgreSQL Installation for WSL
-
-To install Postgres for WSL, run the following commands from your Ubuntu terminal:
-
-```sh
-sudo apt update
-sudo apt install postgresql postgresql-contrib libpq-dev
-```
-
-Then confirm that Postgres was installed successfully:
-
-```sh
-psql --version
-```
-
-Run this command to start the Postgres service:
-
-```sh
-sudo service postgresql start
-```
-
-Finally, you'll also need to create a database user so that you are able to
-connect to the database from Rails. First, check what your operating system
-username is:
-
-```sh
-whoami
-```
-
-If your username is "ian", for example, you'd need to create a Postgres user
-with that same name. To do so, run this command to open the Postgres CLI:
-
-```sh
-sudo -u postgres -i
-```
-
-From the Postgres CLI, run this command (replacing "ian" with your username):
-
-```sh
-createuser -sr ian
-```
-
-Then enter `control + d` or type `logout` to exit.
-
-[This guide][postgresql wsl] has more info on setting up Postgres on WSL if you
-get stuck.
-
-[postgresql wsl]: https://docs.microsoft.com/en-us/windows/wsl/tutorials/wsl-database#install-postgresql
-
-#### Postgresql Installation for OSX
-
-To install Postgres for OSX, you can use Homebrew:
-
-```sh
-brew install postgresql
-```
-
-Once Postgres has been installed, run this command to start the Postgres
-service:
-
-```sh
-brew services start postgresql
-```
-
-## Troubleshooting
-
-If you ran into any errors along the way, here are some things you can try to
-troubleshoot:
-
-- If you're on a Mac and got a server connection error when you tried to run
-  `rails db:create`, one option for solving this problem for Mac users is to
-  install the Postgres app. To do this, first uninstall `postgresql` by running
-  `brew remove postgresql`. Next, download the app from the
-  [Postgres downloads page][postgres downloads page] and install it. Launch the
-  app and click "Initialize" to create a new server. You should now be able to
-  run `rails db:create`.
-
-- If you're using WSL and got the following error running `rails db:create`:
-
-  ```txt
-  PG::ConnectionBad: FATAL:  role "yourusername" does not exist
-  ```
-
-  The issue is that you did not create a role in Postgres for the default user
-  account. Check [this video](https://www.youtube.com/watch?v=bQC5izDzOgE) for
-  one possible fix.
-
-- If your app failed to deploy at the build stage, make sure your local
-  environment is set up correctly by following the steps at the beginning of
-  this lesson. Check that you have the latest versions of Ruby and Bundler, and
-  ensure that Postgresql was installed successfully.
-
-- If you deployed successfully, but you ran into issues when you visited the
-  site, make sure you migrated and seeded the database. Also, make sure that
-  your application works locally and try to debug any issues on your local
-  machine before re-deploying. You can also check the logs on the server by
-  running `heroku logs`.
-
-For additional support, check out these guides on Heroku:
-
-- [Deploying a Rails 6 App to Heroku][heroku rails deploying guide]
-- [Rails Troubleshooting on Heroku][troubleshooting guide on heroku]
-
-[postgres downloads page]: https://postgresapp.com/downloads.html
-[heroku rails deploying guide]: https://devcenter.heroku.com/articles/getting-started-with-rails6
-[troubleshooting guide on heroku]: https://devcenter.heroku.com/articles/getting-started-with-rails6#troubleshooting
+You should also be able to test this in the React application by logging in to
+check the `POST /login` route; and logging out with the logout button to test
+the `DELETE /logout` route.
+
+### Recipe List Feature
+
+Users should only be able to view recipes on our site after logging in.
+
+Handle recipe viewing by implementing a `GET /recipes` route. It should:
+
+- Be handled in the `RecipesController` with a `index` action
+- In the `index` action, if the user is logged in (if their `user_id` is in the
+  session hash):
+  - Return a JSON response with an array of all recipes with their title,
+    instructions, and minutes to complete data along with a nested user object;
+    and an HTTP status code of 201 (Created)
+- If the user is **not** logged in when they make the request:
+  - Return a JSON response with an error message, and a status of 401
+    (Unauthorized)
+
+### Recipe Creation Feature
+
+Now that users can log in, let's allow them to create new recipes!
+
+Handle recipe creation by implementing a `POST /recipes` route. It should:
+
+- Be handled in the `RecipesController` with a `create` action
+- In the `create` action, if the user is logged in (if their `user_id` is in the
+  session hash):
+  - Save a new recipe to the database if it is valid. The recipe should **belong
+    to** the logged in user, and should have title, instructions, and minutes to
+    complete data provided from the params hash
+  - Return a JSON response with the title, instructions, and minutes to complete
+    data along with a nested user object; and an HTTP status code of 201
+    (Created)
+- If the user is **not** logged in when they make the request:
+  - Return a JSON response with an error message, and a status of 401
+    (Unauthorized)
+- If the recipe is **not valid**:
+  - Return a JSON response with the error messages, and an HTTP status code of
+    422 (Unprocessable Entity)
+
+After finishing the `RecipeController` features, you're done! Make sure to check
+your work. You should be able to run the full test suite now with `learn test`.
+
+You should also be able to test this in the React application by creating a new
+recipe with the recipe form, and viewing a list of recipes.

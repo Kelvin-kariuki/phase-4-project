@@ -66,17 +66,16 @@ GEM
       tzinfo (~> 2.0)
       zeitwerk (~> 2.3)
     bcrypt (3.1.16)
-    bootsnap (1.7.5)
-      msgpack (~> 1.0)
     builder (3.2.4)
     byebug (11.1.3)
     case_transform (0.2)
       activesupport
-    concurrent-ruby (1.1.9)
+    concurrent-ruby (1.1.8)
     crass (1.0.6)
     diff-lcs (1.4.4)
     erubi (1.10.0)
     ffi (1.15.1)
+    foreman (0.87.2)
     globalid (0.4.2)
       activesupport (>= 4.2.0)
     i18n (1.8.10)
@@ -85,7 +84,7 @@ GEM
     listen (3.5.1)
       rb-fsevent (~> 0.10, >= 0.10.3)
       rb-inotify (~> 0.9, >= 0.9.10)
-    loofah (2.10.0)
+    loofah (2.9.1)
       crass (~> 1.0.2)
       nokogiri (>= 1.5.9)
     mail (2.7.1)
@@ -95,14 +94,14 @@ GEM
     mini_mime (1.0.3)
     mini_portile2 (2.5.3)
     minitest (5.14.4)
-    msgpack (1.4.2)
     nio4r (2.5.7)
     nokogiri (1.11.7)
       mini_portile2 (~> 2.5.0)
       racc (~> 1.4)
     nokogiri (1.11.7-x86_64-darwin)
       racc (~> 1.4)
-    pg (1.2.3)
+    nokogiri (1.11.7-x86_64-linux)
+      racc (~> 1.4)
     puma (5.3.2)
       nio4r (~> 2.0)
     racc (1.5.2)
@@ -159,7 +158,6 @@ GEM
     rspec-support (3.10.2)
     shoulda-matchers (4.5.1)
       activesupport (>= 4.2.0)
-    spring (2.1.1)
     sprockets (4.0.2)
       concurrent-ruby (~> 1.0)
       rack (> 1, < 3)
@@ -167,6 +165,7 @@ GEM
       actionpack (>= 4.0)
       activesupport (>= 4.0)
       sprockets (>= 3.0.0)
+    sqlite3 (1.4.2)
     thor (1.1.0)
     tzinfo (2.0.4)
       concurrent-ruby (~> 1.0)
@@ -178,24 +177,21 @@ GEM
 PLATFORMS
   ruby
   x86_64-darwin-19
+  x86_64-linux
 
 DEPENDENCIES
   active_model_serializers (~> 0.10.12)
   bcrypt (~> 3.1.7)
-  bootsnap (>= 1.4.4)
   byebug
+  foreman (~> 0.87)
   listen (~> 3.3)
-  pg (~> 1.1)
   puma (~> 5.0)
   rails (~> 6.1.3, >= 6.1.3.2)
   rspec-json_expectations
   rspec-rails (~> 5.0.0)
   shoulda-matchers (~> 4.0)
-  spring
+  sqlite3 (~> 1.4)
   tzinfo-data
 
-RUBY VERSION
-   ruby 2.7.4p191
-
 BUNDLED WITH
-   2.2.24
+   2.2.16
