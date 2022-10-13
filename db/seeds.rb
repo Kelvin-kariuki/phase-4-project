@@ -4,4 +4,5 @@
 # Examples:
 #
 #   movies = Movie.create([{ name: 'Star Wars' }, { name: 'Lord of the Rings' }])
+Tender.create!(title: 'yyyyyy', instructions: "gfgfgfgfgfgfgfgf",minutes_to_complete: 3, user_id: 1)
 #   Character.create(name: 'Luke', movie: movies.first)

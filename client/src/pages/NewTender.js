@@ -101,7 +101,7 @@ function NewTender({ user }) {
     // </Wrapper>
   // );
 // } 
-<div>test</div>
+<div>test 1 tenders</div>
   )
 
 // const Wrapper = styled.section`

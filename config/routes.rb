@@ -7,8 +7,8 @@ Rails.application.routes.draw do
   post '/login', to: 'sessions#create'
   delete '/logout', to: 'sessions#destroy'
 
-  get '/tenders', to: 'tenders#index'
-  post '/tenders', to: 'tenders#create'
+  # get '/tenders', to: 'tenders#index'
+  # post '/tenders', to: 'tenders#create'
   
   # For details on the DSL available within this file, see https://guides.rubyonrails.org/routing.html
 end
