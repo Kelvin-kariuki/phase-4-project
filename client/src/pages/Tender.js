@@ -27,8 +27,8 @@ function Tender({setTender, tender}) {
     <div> <div className="row">
     <div className="col m-2">
       {tender.map((tenders)=>(
-      <div className='card' style={{width : 25 + 'rem'}} >
-         
+      <div className='card' style={{width : 100% + 'rem'}} >
+       <br></br>
           Tender Name: &nbsp;{tenders.name}<br></br>
           <br></br>
       <br></br>
