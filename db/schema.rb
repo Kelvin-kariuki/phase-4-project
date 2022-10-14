@@ -12,20 +12,11 @@
 
 ActiveRecord::Schema.define(version: 2022_10_12_225350) do
 
-  create_table "recipes", force: :cascade do |t|
-    t.string "title"
-    t.text "instructions"
-    t.integer "minutes_to_complete"
-    t.integer "user_id"
-    t.datetime "created_at", precision: 6, null: false
-    t.datetime "updated_at", precision: 6, null: false
-  end
-
   create_table "tenders", force: :cascade do |t|
-    t.string "title"
-    t.integer "user_id"
-    t.integer "minutes_to_complete"
-    t.text "instructions"
+    t.string "name"
+    t.integer "cost"
+    t.string "description"
+    t.string "serial"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
   end

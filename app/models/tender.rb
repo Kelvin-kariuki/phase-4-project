@@ -1,6 +1,7 @@
 class Tender < ApplicationRecord
-    belongs_to :user
+    
 
-    # validates :title, presence: true
-    # validates :instructions, length: { minimum: 100}
+    validates :name, presence: true
+    validates :cost, numericality: { only_integer: true }
+    validates :description, length: { minimum: 10}
 end

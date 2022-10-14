@@ -1,30 +1,58 @@
 class TendersController < ApplicationController
-    before_action :authorize
+rescue_from ActiveRecord::RecordNotFound, with: :render_error
+rescue_from ActiveRecord::RecordInvalid, with: :render_unprocessable_entity_response
 
-  def index
-    tenders = Tender.all
-    render json: tenders, status: :created
-  end
+ before_action :authorize
 
-  def create
-    user = User.find_by(id: session[:user_id])
-    tender = user.tenders.create(tender_params)
-    if tender.valid?
-      tender.save
-      render json: tender, status: :created
-    else
-      render json: {errors: tender.errors.full_messages}, status: :unprocessable_entity
+    def index
+       render json: Tender.all,status: :ok
+    end 
+
+   
+
+    def show
+        tender= find_tender
+        render json: tender, status: :ok
+    end
+
+     def update
+        tender = find_tender
+        Tender.update!(tender_params)
+        render json: tender
+    end
+
+
+    def create
+        tender= Tender.create!(tender_params)
+        render json: tender, status: :created
+    end
+
+
+    def destroy
+        tender = find_tender
+        Tender.destroy
+        head :no_content
+    end
+
+    private
+
+    def render_error
+        render json: { error: "tender not found" }, status: :not_found
+     end
+    
+    def find_tender
+         Tender.find(params[:id])
+    end
+    
+    def tender_params
+        params.permit(:name, :serial, :description, :cost)
+    end
+
+    def render_unprocessable_entity_response(invalid)
+        render json: { errors: invalid.record.errors.full_messages }, status: :unprocessable_entity
+    end
+
+    def authorize
+    return render json: { error: "Not authorized" }, status: :unauthorized unless session.include? :user_id
     end
   end
-
-  private
-
-  def authorize
-    return render json: { errors: ["Not authorized"] }, status: :unauthorized unless session.include? :user_id
-  end
-
-  def tender_params
-    params.permit(:title, :instructions, :minutes_to_complete, :user_id)
-  end
-end
-

@@ -7,7 +7,7 @@ import Tender from "../pages/Tender";
 
 function App() {
   const [user, setUser] = useState(null);
-  const [tender, setTender] = useState([]);
+  const [tender, setTender] = useState([]); 
  
   useEffect(() => {
     // auto-login
@@ -17,11 +17,7 @@ function App() {
       }
     });
 
-    fetch("/tenders").then((r) => {
-      if (r.ok) {
-        r.json().then((data) => setTender(data));
-      }
-    });
+
 
   }, []);
 
@@ -34,13 +30,14 @@ function App() {
       <NavBar user={user} setUser={setUser} />
       
       <main>
-        <Switch>
-          <Route path="/new">
-          <Tender tender={tender} setTender= {setTender}/>
-            {/* <NewTender user={user} /> */}
-          </Route>
+        
+         
+          <Tender tender={tender} setTender={setTender}/>
+          
 
-        </Switch>
+          
+          <NewTender tender={tender} setTender={setTender} />
+
       </main>
     </>
   );

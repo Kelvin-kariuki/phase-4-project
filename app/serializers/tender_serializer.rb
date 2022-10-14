@@ -1,3 +1,5 @@
 class TenderSerializer < ActiveModel::Serializer
-  attributes :id, :title, :user_id, :minutes_to_complete, :instructions
+  attributes :id, :name, :description, :serial, :cost
+
+  
 end

@@ -2,8 +2,11 @@ import React from "react";
 import { Link } from "react-router-dom";
 import styled from "styled-components";
 import { Button } from "../styles";
+import { NavLink } from "react-router-dom";
 
 function NavBar({ user, setUser }) {
+  
+
   function handleLogoutClick() {
     fetch("/logout", { method: "DELETE" }).then((r) => {
       if (r.ok) {
@@ -18,12 +21,17 @@ function NavBar({ user, setUser }) {
         <Link to="/">Tenderprenuer</Link>
       </Logo>
       <Nav>
-        <Button as={Link} to="/new">
-          Post Tender
+      
+      <Button >
+      <a class="nav-link scrollto" href="#Tender">Post Tender</a>
+          
         </Button>
+      
+        
         <Button variant="outline" onClick={handleLogoutClick}>
           Logout
         </Button>
+        
       </Nav>
     </Wrapper>
   );
